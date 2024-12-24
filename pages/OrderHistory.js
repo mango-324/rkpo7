@@ -123,8 +123,7 @@ const OrderHistory = () => {
                         {/*    Место доставки: {item.deliveryAddress}*/}
                         {/*</Text>*/}
                         <Text style={styles.orderText}>
-                            Место доставки: {item.deliveryCoordinates.latitude}{" "}
-                            {item.deliveryCoordinates.longitude}
+                            Место доставки: {item.deliveryAddress}
                         </Text>
 
                         <TouchableOpacity style={styles.deleteOrderButton} onPress={() => handleDeleteOrder(item.id)}>

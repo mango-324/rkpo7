@@ -14,6 +14,7 @@ const Order = ({navigation}) => {
     const total = route.params?.total;
     const mapRef = useRef(null);
 
+    const [address, setAddress] = useState('');
     const [date, setDate] = useState(new Date());
     const [show, setShow] = useState(false);
     const [coordinates, setCoordinates] = useState({
@@ -39,6 +40,25 @@ const Order = ({navigation}) => {
 
     const [selectedAddress, setSelectedAddress] = useState('');
 
+    const getAddress = async (latitude, longitude) => {
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
+
+        try {
+            const response = await(await fetch(url, {
+                headers: {
+                    'User-Agent': 'CartAppLR7/1.0 (mashamango324@gmail.com)',
+                    'Accept': 'application/json',
+                },
+            }));
+            const data = await response.json();
+            const address = data.display_name;
+            console.log(address); // Выводите или используйте адрес
+            setAddress(address); // Обновите состояние для отображения
+        } catch (error) {
+            console.error('Error getting address: ', error);
+        }
+    };
+
     // const handleAddressChange = (newAddress) => {
     //     setSelectedAddress(newAddress); // Обновляем адрес в родительском компоненте
     // };
@@ -49,7 +69,6 @@ const Order = ({navigation}) => {
             latitudeDelta: coordinates.latitudeDelta,
             longitudeDelta: coordinates.longitudeDelta,
         };
-
         setCoordinates(newCoordinates);
     };
 
@@ -66,6 +85,7 @@ const Order = ({navigation}) => {
                 latitude: coordinates.latitude,
                 longitude: coordinates.longitude,
             },
+            deliveryAddress: address,
         };
 
         console.log("orderData:", orderData);
@@ -110,7 +130,7 @@ const Order = ({navigation}) => {
                 style={styles.map}
                 initialRegion={initialRegion}
                 ref={mapRef}
-                onRegionChangeComplete={(region) => setCoordinates(region)}
+                onRegionChangeComplete={(region) => {setCoordinates(region); getAddress(region.latitude, region.longitude);}}
             >
                 <Marker
                     coordinate={{
@@ -121,6 +141,7 @@ const Order = ({navigation}) => {
                     onDragEnd={onMarkerDragEnd}
                 />
             </MapView>
+            <Text style={styles.totalAddress}>{address}</Text>
 
             <TouchableOpacity style={styles.confirmOrderButton} onPress={handleConfirmOrder}>
                 <Text style={styles.buttonText}>Подтвердить заказ</Text>
@@ -139,7 +160,7 @@ const styles = StyleSheet.create({
     map: {
         width: 300,
         height: 300,
-        marginVertical: 50,
+        marginVertical: 20,
     },
     input: {
         height: 40,
@@ -161,9 +182,15 @@ const styles = StyleSheet.create({
         color: '#171717',
     },
     totalDelivery: {
-        fontSize: 18,
+        fontSize: 16,
         marginTop: 10,
         marginBottom: 10,
+        color: '#171717',
+    },
+    totalAddress: {
+        fontSize: 16,
+        marginTop: 3,
+        marginBottom: 3,
         color: '#171717',
     },
     confirmOrderButton: {
