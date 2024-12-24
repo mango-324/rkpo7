@@ -1,14 +1,18 @@
-import React, {useState} from "react";
-import {Button, Platform, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import React, {useRef, useState} from "react";
+import {Alert, Button, Platform, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {useRoute} from "@react-navigation/native";
-import MapWithDraggableMarker from "../components/Map";
+// import MapWithDraggableMarker from "../components/Map";
+import MapView, { Marker } from "react-native-maps";
+import moment from "moment";
+import 'moment/dist/locale/ru';
 
 const Order = ({navigation}) => {
     const route = useRoute()
     const orderId = route.params?.orderId;
     const total = route.params?.total;
+    const mapRef = useRef(null);
 
     const [date, setDate] = useState(new Date());
     const [show, setShow] = useState(false);
@@ -18,6 +22,13 @@ const Order = ({navigation}) => {
         latitudeDelta: 0.1,
         longitudeDelta: 0.1,
     });
+    // Начальные координаты
+    const initialRegion = {
+        latitude: 55.75222, // Широта Москвы
+        longitude: 37.61556, // Долгота Москвы
+        latitudeDelta: 0.1, // Увеличение области отображения для Москвы
+        longitudeDelta: 0.1, // Увеличение области отображения для Москвы
+    };
 
     // Handler для выбора даты
     const onChangeDatepicker = (event, selectedDate) => {
@@ -28,8 +39,18 @@ const Order = ({navigation}) => {
 
     const [selectedAddress, setSelectedAddress] = useState('');
 
-    const handleAddressChange = (newAddress) => {
-        setSelectedAddress(newAddress); // Обновляем адрес в родительском компоненте
+    // const handleAddressChange = (newAddress) => {
+    //     setSelectedAddress(newAddress); // Обновляем адрес в родительском компоненте
+    // };
+    const onMarkerDragEnd = async (e) => {
+        const newCoordinates = {
+            latitude: e.nativeEvent.coordinate.latitude,
+            longitude: e.nativeEvent.coordinate.longitude,
+            latitudeDelta: coordinates.latitudeDelta,
+            longitudeDelta: coordinates.longitudeDelta,
+        };
+
+        setCoordinates(newCoordinates);
     };
 
     // Подтверждение заказа
@@ -40,7 +61,11 @@ const Order = ({navigation}) => {
             total: total,
             orderId: orderId,
             deliveryDate: date.toISOString(),
-            deliveryAddress: selectedAddress,
+            // deliveryAddress: selectedAddress,
+            deliveryCoordinates: {
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+            },
         };
 
         console.log("orderData:", orderData);
@@ -59,6 +84,8 @@ const Order = ({navigation}) => {
         navigation.navigate("История заказов");
     };
 
+    moment.locale('ru');
+
     return (
         <View style={styles.container}>
             <Text style={styles.total}>Номер Вашего заказа: {orderId}</Text>
@@ -76,9 +103,24 @@ const Order = ({navigation}) => {
                         />
                     )}
                 </TouchableOpacity>
-                <Text style={styles.totalDelivery}> Дата доставки: {date.toLocaleDateString()}</Text>
+                <Text style={styles.totalDelivery}> Дата доставки: {moment(date).format("DD.MM.YYYY")}</Text>
             </View>
-            <MapWithDraggableMarker onAddressChange={handleAddressChange}/>
+             {/*<MapWithDraggableMarker onAddressChange={handleAddressChange}/>*/}
+            <MapView
+                style={styles.map}
+                initialRegion={initialRegion}
+                ref={mapRef}
+                onRegionChangeComplete={(region) => setCoordinates(region)}
+            >
+                <Marker
+                    coordinate={{
+                        latitude: coordinates.latitude,
+                        longitude: coordinates.longitude,
+                    }}
+                    draggable
+                    onDragEnd={onMarkerDragEnd}
+                />
+            </MapView>
 
             <TouchableOpacity style={styles.confirmOrderButton} onPress={handleConfirmOrder}>
                 <Text style={styles.buttonText}>Подтвердить заказ</Text>
@@ -128,20 +170,22 @@ const styles = StyleSheet.create({
         marginTop: 20,
         backgroundColor: '#eb8d19',
         borderRadius: 5,
-        paddingVertical: 4,
         paddingHorizontal: 20,
+        paddingBottom: 7,
+        paddingTop: 7,
     },
     selectDateButton: {
         marginTop: 20,
         backgroundColor: '#eb8d19',
         borderRadius: 5,
-        paddingVertical: 4,
+        paddingBottom: 7,
+        paddingTop: 7,
         paddingHorizontal: 20,
     },
     buttonText: {
         color: '#fff',
         textAlign: 'center',
-        fontSize: 18,
+        fontSize: 16,
     },
 });
 

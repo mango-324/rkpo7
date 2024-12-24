@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Button, Alert } from "react-native";
+import {View, Text, FlatList, StyleSheet, Button, Alert, TouchableOpacity} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 
@@ -119,13 +119,17 @@ const OrderHistory = () => {
                         <Text style={styles.orderText}>
                             Дата доставки: {moment(item.deliveryDate).format("DD.MM.YYYY")}
                         </Text>
+                        {/*<Text style={styles.orderText}>*/}
+                        {/*    Место доставки: {item.deliveryAddress}*/}
+                        {/*</Text>*/}
                         <Text style={styles.orderText}>
-                            Место доставки: {item.deliveryAddress}
+                            Место доставки: {item.deliveryCoordinates.latitude}{" "}
+                            {item.deliveryCoordinates.longitude}
                         </Text>
-                        <Button
-                            title="Удалить"
-                            onPress={() => handleDeleteOrder(item.id)}
-                        />
+
+                        <TouchableOpacity style={styles.deleteOrderButton} onPress={() => handleDeleteOrder(item.id)}>
+                            <Text style={styles.buttonText}>Удалить заказ</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             />
@@ -147,6 +151,19 @@ const styles = StyleSheet.create({
     orderText: {
         fontSize: 16,
         marginBottom: 5,
+    },
+    deleteOrderButton: {
+        marginTop: 10,
+        backgroundColor: '#eb8d19',
+        borderRadius: 5,
+        paddingBottom: 5,
+        paddingTop: 5,
+        paddingHorizontal: 20,
+    },
+    buttonText: {
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 16,
     },
     productText: {
         fontSize: 14,

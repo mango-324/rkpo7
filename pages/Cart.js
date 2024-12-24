@@ -226,7 +226,7 @@ const Cart = ({navigation}) => {
 
                     <Text style={styles.sectionHeader}>Корзина</Text>
                     <View style={styles.cartContainer}>
-                        <DraggableFlatList
+                        <FlatList
                             data={cart}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({item, drag}) => (
@@ -238,13 +238,13 @@ const Cart = ({navigation}) => {
                                     onMoveToWishlist={() => moveToWishlist(item)}
                                 />
                             )}
-                            onDragEnd={({data}) => setCart(data)}
+                            // onDragEnd={({data}) => setCart(data)}
                         />
                     </View>
 
                     <Text style={styles.sectionHeader}>Отложенные товары</Text>
                     <View style={styles.wishlistContainer}>
-                        <DraggableFlatList
+                        <FlatList
                             data={wishlist}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({item, drag}) => (
@@ -254,7 +254,7 @@ const Cart = ({navigation}) => {
                                     onMoveToCart={() => moveToCart(item, true)}
                                 />
                             )}
-                            onDragEnd={({data}) => setWishlist(data)}
+                            // onDragEnd={({data}) => setWishlist(data)}
                         />
                     </View>
 
@@ -276,6 +276,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     sectionHeader: {
+        paddingTop: 20,
         fontSize: 18,
         fontWeight: 'bold',
         marginVertical: 5,
@@ -342,7 +343,8 @@ const styles = StyleSheet.create({
         marginTop: 20,
         backgroundColor: '#eb8d19',
         borderRadius: 5,
-        paddingVertical: 4,
+        paddingBottom: 8,
+        paddingTop: 8,
         paddingHorizontal: 20,
     }
 });
